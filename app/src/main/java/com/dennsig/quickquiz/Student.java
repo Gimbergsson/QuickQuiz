@@ -1,10 +1,10 @@
-package com.dennsig.quickquiz.api;
+package com.dennsig.quickquiz;
 
 /**
  * Created by dgimbergsson on 16-11-07.
  */
 
-public class Questions {
+public class Student {
 
     //Variables that are in our json
     private int StudentId;
