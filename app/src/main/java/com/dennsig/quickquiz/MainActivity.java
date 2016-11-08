@@ -1,5 +1,6 @@
 package com.dennsig.quickquiz;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -10,20 +11,21 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import okhttp3.OkHttpClient;
+import fr.castorflex.android.circularprogressbar.CircularProgressDrawable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     @BindView(R.id.question_TextView) TextView questionTextView;
+    @BindView(R.id.progressBar) ProgressBar mProgressBar;
     String baseURL = "https://dennisgimbergsson.se/";
 
     @Override
@@ -44,13 +47,23 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mProgressBar.setVisibility(View.GONE);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                getQuestionsArray();
+                final Snackbar snackbar = Snackbar
+                .make(view, "Getting results", Snackbar.LENGTH_SHORT)
+                        .setActionTextColor(getResources().getColor(R.color.gplus_color_4));
+                snackbar.setAction("Dismiss", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        snackbar.dismiss();
+                    }
+                });
+                snackbar.show();
+                getJsonQuestionsArray();
             }
         });
 
@@ -77,7 +90,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.activity_main_drawer, menu);
         return true;
     }
 
@@ -121,7 +134,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    void getQuestionsArray() {
+    void getJsonQuestionsArray() {
 
         Gson gson = new GsonBuilder()
                 .setLenient()
@@ -132,10 +145,17 @@ public class MainActivity extends AppCompatActivity
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
+        mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setIndeterminateDrawable(new CircularProgressDrawable
+                .Builder(this)
+                .colors(getResources().getIntArray(R.array.gplus_colors))
+                .sweepSpeed(1f)
+                .strokeWidth(dpToPx(4))
+                .style(CircularProgressDrawable.STYLE_ROUNDED)
+                .build());
+
         RetrofitArrayAPI service = retrofit.create(RetrofitArrayAPI.class);
-
         Call<List<Student>> call = service.getStudentDetails();
-
         call.enqueue(new Callback<List<Student>>() {
             @Override
             public void onResponse(Call<List<Student>> call, Response<List<Student>> response) {
@@ -155,12 +175,21 @@ public class MainActivity extends AppCompatActivity
                     Log.d("onResponse", "There is an error");
                     e.printStackTrace();
                 }
+                mProgressBar.setVisibility(View.GONE);
             }
 
             @Override
             public void onFailure(Call<List<Student>> call, Throwable t) {
                 Log.d("onFailure", t.toString());
+                mProgressBar.setVisibility(View.GONE);
             }
         });
+    }
+
+    public int dpToPx(int dp) {
+        Resources r = getResources();
+        int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                dp, r.getDisplayMetrics());
+        return px;
     }
 }
