@@ -1,8 +1,8 @@
 package com.dennsig.quickquiz;
 
 /**
- * Created by dgimbergsson on 16-11-07.
- */
+ * Created by Dennis Gimbergsson
+ **/
 
 public class Student {
 
