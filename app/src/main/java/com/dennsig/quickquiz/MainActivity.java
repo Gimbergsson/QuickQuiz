@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -53,13 +54,13 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final Snackbar snackbar = Snackbar
+                Snackbar snackbar = Snackbar
                 .make(view, "Getting results", Snackbar.LENGTH_SHORT)
                         .setActionTextColor(getResources().getColor(R.color.gplus_color_4));
                 snackbar.setAction("Dismiss", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        snackbar.dismiss();
+                        Toast.makeText(MainActivity.this, "Displaying toaster for Snackbar action", Toast.LENGTH_SHORT).show();
                     }
                 });
                 snackbar.show();
